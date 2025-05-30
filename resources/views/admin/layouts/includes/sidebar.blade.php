@@ -17,9 +17,18 @@
                     <span class="hide-menu">Home</span>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link primary-hover-bg" href="./index.html" aria-expanded="false">
+                    <a class="sidebar-link primary-hover-bg {{ request()->routeIs('admin.dashboard.*') ? 'active' : '' }}"
+                        href="{{ route('admin.dashboard.index') }}" aria-expanded="false">
                         <iconify-icon icon="solar:atom-line-duotone"></iconify-icon>
                         <span class="hide-menu">Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item">
+                    <a class="sidebar-link primary-hover-bg {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}"
+                        href="{{ route('admin.categories.index') }}" aria-expanded="false">
+                        <iconify-icon icon="solar:atom-line-duotone"></iconify-icon>
+                        <span class="hide-menu">Category</span>
                     </a>
                 </li>
 

@@ -34,6 +34,7 @@
             </div>
         </div>
     </div>
+    @stack('modal-section')
     @include('admin.layouts.includes.scripts')
     @stack('after-scripts')
 </body>
