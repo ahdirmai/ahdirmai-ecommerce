@@ -13,6 +13,7 @@ class Product extends Model implements HasMedia
     use InteractsWithMedia;
     protected $guarded = [];
 
+
     // Category
     public function category()
     {

@@ -43,31 +43,10 @@
                 <div class="w-16 h-1 bg-black dark:bg-white mx-auto mt-2"></div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                @foreach ([
-        [
-            'icon' => 'fas fa-paint-brush',
-            'title' => 'UI Kits & Templates',
-            'description' => 'Professional design resources for your next project',
-        ],
-        [
-            'icon' => 'fas fa-code',
-            'title' => 'Code & Scripts',
-            'description' => 'Ready-to-use code snippets and full applications',
-        ],
-        [
-            'icon' => 'fas fa-photo-video',
-            'title' => 'Graphics & Media',
-            'description' => 'Stock photos, videos, and graphic elements',
-        ],
-        [
-            'icon' => 'fas fa-book',
-            'title' => 'E-books & Courses',
-            'description' => 'Educational resources to enhance your skills',
-        ],
-    ] as $category)
+                @foreach ($categories as $category)
                     <div class="bg-white dark:bg-gray-700 p-6 rounded shadow text-center dark-transition">
-                        <i class="{{ $category['icon'] }} text-3xl mb-4 text-black dark:text-white"></i>
-                        <h3 class="text-lg font-semibold mb-2">{{ $category['title'] }}</h3>
+                        <i class="fas {{ $category['icon'] }} text-3xl mb-4 text-black dark:text-white"></i>
+                        <h3 class="text-lg font-semibold mb-2">{{ $category['name'] }}</h3>
                         <p class="text-gray-600 dark:text-gray-300 mb-4">{{ $category['description'] }}</p>
                         <a href="#" class="text-black dark:text-white font-semibold hover:underline">
                             Explore <i class="fas fa-arrow-right"></i>
@@ -86,50 +65,20 @@
                 <div class="w-16 h-1 bg-black dark:bg-white mx-auto mt-2"></div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                @foreach ([
-        [
-            'image' => 'https://picsum.photos/300/200.webp',
-            'category' => 'UI Kit',
-            'title' => 'Premium Dashboard UI Kit',
-            'rating' => 4.5,
-            'reviews' => 42,
-            'price' => 59.99,
-            'old_price' => 79.99,
-        ],
-        [
-            'image' => 'https://picsum.photos/301/200.webp',
-            'category' => 'Code',
-            'title' => 'React Component Library',
-            'rating' => 5.0,
-            'reviews' => 38,
-            'price' => 89.99,
-            'old_price' => 119.99,
-        ],
-        [
-            'image' => 'https://picsum.photos/302/200.webp',
-            'category' => 'Graphics',
-            'title' => 'Premium Graphics Pack',
-            'rating' => 4.0,
-            'reviews' => 25,
-            'price' => 39.99,
-            'old_price' => 59.99,
-        ],
-        [
-            'image' => 'https://picsum.photos/303/200.webp',
-            'category' => 'E-book',
-            'title' => 'Web Development Course',
-            'rating' => 4.5,
-            'reviews' => 67,
-            'price' => 29.99,
-            'old_price' => 49.99,
-        ],
-    ] as $product)
+                @foreach ($products as $product)
                     {{-- @include('partials.product-card', $product) --}}
 
                     <x-product-card :product="$product" />
                 @endforeach
             </div>
-        </div>
+
+            {{-- view all product --}}
+            <div class="text-center mt-12">
+                <a href="{{ route('products.index') }}"
+                    class="px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-semibold rounded hover:-translate-y-1 transition">
+                    View All Products
+                </a>
+            </div>
     </section>
 
     <!-- Testimonials Section -->
