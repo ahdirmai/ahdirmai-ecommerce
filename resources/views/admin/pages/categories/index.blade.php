@@ -27,101 +27,7 @@
 
         <div class="row">
             <!-- Category Form -->
-            <div class="col-xl-4 col-lg-5 mb-4">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-bottom">
-                        <h5 class="card-title mb-0" id="formTitle">
-                            <i class="bi bi-plus-circle me-2"></i>
-                            Add New Category
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ route('admin.categories.store') }}" novalidate
-                            id="categoryForm">
-                            @csrf
-                            {{-- Category Icon Font Awsome Icon --}}
-                            <div class="mb-3">
-                                <label for="icon" class="form-label fw-medium">
-                                    Category Icon <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" class="form-control @error('icon') is-invalid @enderror"
-                                    id="icon" name="icon" value="{{ old('icon', $category->icon ?? '') }}"
-                                    placeholder="Enter icon class (e.g., fa-solid fa-box)" required maxlength="100"
-                                    autocomplete="off">
-                                @error('icon')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <div class="form-text">
-                                    <small>Use Font Awesome icon classes (e.g., fa-solid fa-box)</small>
-                                </div>
-                            </div>
-
-                            <!-- Category Name -->
-                            <div class="mb-3">
-                                <label for="name" class="form-label fw-medium">
-                                    Category Name <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                    id="name" name="name" value="{{ old('name', $category->name ?? '') }}"
-                                    placeholder="Enter category name" required maxlength="100" autocomplete="off">
-                                @error('name')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <div class="form-text">
-                                    <small>Enter a unique name (2-100 characters)</small>
-                                </div>
-                            </div>
-
-                            {{-- category Description --}}
-                            <div class="mb-3">
-                                <label for="description" class="form-label fw-medium">
-                                    Category Description
-                                </label>
-                                <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description"
-                                    rows="3" placeholder="Enter category description (optional)" maxlength="500">{{ old('description', $category->description ?? '') }}</textarea>
-                                @error('description')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <div class="form-text">
-                                    <small>Optional description (max 500 characters)</small>
-                                </div>
-                            </div>
-
-                            <!-- Category Type -->
-                            <div class="mb-4">
-                                <label for="type" class="form-label fw-medium">
-                                    Category Type <span class="text-danger">*</span>
-                                </label>
-                                <select class="form-select @error('type') is-invalid @enderror" id="type"
-                                    name="type" required>
-                                    <option value="">-- Select Type --</option>
-                                    <option value="digital"
-                                        {{ old('type', $category->type ?? '') == 'digital' ? 'selected' : '' }}>Digital
-                                        Products</option>
-                                    <option value="physical"
-                                        {{ old('type', $category->type ?? '') == 'physical' ? 'selected' : '' }}>
-                                        Physical Products</option>
-                                </select>
-                                @error('type')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                <div class="form-text">
-                                    <small>Choose product type for this category</small>
-                                </div>
-                            </div>
-
-                            <!-- Form Actions -->
-
-                        </form>
-                        <div class="d-grid gap-2" id="formActions">
-                            <button type="submit" class="btn btn-primary" id="submitBtn" form="categoryForm">
-                                <i class="bi bi-plus-lg me-1"></i>
-                                Create Category
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @include('admin.pages.categories.category-form')
 
             <!-- Categories List -->
             <div class="col-xl-8 col-lg-7">
@@ -202,8 +108,7 @@
                                             <td class="text-center">
                                                 <div class="btn-group btn-group-sm" role="group">
                                                     <button data-route="{{ route('admin.categories.update', $cat) }}"
-                                                        data-id="{{ $cat->id }}"
-                                                        data-name="{{ $cat->name }}"
+                                                        data-id="{{ $cat->id }}" data-name="{{ $cat->name }}"
                                                         data-icon="{{ $cat->icon }}"
                                                         data-description="{{ $cat->description }}"'
                                                         data-type="{{ $cat->type }}"
@@ -249,41 +154,10 @@
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title" id="deleteModalLabel">
-                        <i class="bi bi-exclamation-triangle text-warning me-2"></i>
-                        Confirm Deletion
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body pt-0">
-                    <p class="mb-3">Are you sure you want to delete the category <strong
-                            id="deleteCategoryName"></strong>?</p>
-                    <div class="alert alert-warning border-warning bg-warning bg-opacity-10">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Warning:</strong> This action cannot be undone. Products associated with this category
-                        may be affected.
-                    </div>
-                </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-lg me-1"></i>Cancel
-                    </button>
-                    <form id="deleteForm" method="POST" style="display: inline;" action="">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash me-1"></i>Delete Category
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    @push('modal-section')
+        <!-- Delete Confirmation Modal -->
+        @include('admin.pages.categories.delete-modal')
+    @endpush
 
     @push('after-scripts')
         <script>
