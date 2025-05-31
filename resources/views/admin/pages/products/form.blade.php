@@ -10,12 +10,10 @@
 
         @include('admin.layouts.alerts')
 
-
         <div class="row">
             <!-- Categories List -->
             {{-- button add product (a href to route('admin.products.create')) --}}
             <div class="text-start">
-
                 <a href="{{ route('admin.products.index') }}" class="btn btn-secondary mb-3 btn-sm">
                     <i class="fa-solid fa-arrow-left me-2"></i>
                     Back to Products
@@ -23,10 +21,10 @@
             </div>
 
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-4">
-                <form method="POST" action="{{ $action }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ $action }}" enctype="multipart/form-data" id="product-form"
+                    class="need-validation">
                     {{-- basic Information --}}
                     <div class="card border-0 shadow-sm">
-
                         <div class="card-body p-0">
                             <div class="p-4">
                                 @csrf
@@ -38,20 +36,35 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="name" class="form-label">Product Name</label>
-                                    <input type="text" class="form-control" id="name" name="name"
-                                        value="{{ old('name', $product->name ?? '') }}" required>
+                                    <label for="name" class="form-label">
+                                        Product Name <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                        id="name" name="name" value="{{ old('name', $product->name ?? '') }}"
+                                        required minlength="2" maxlength="255">
+                                    @error('name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control" id="description" name="description" rows="4">{{ old('description', $product->description ?? '') }}</textarea>
+                                    <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description"
+                                        rows="4" maxlength="1000">{{ old('description', $product->description ?? '') }}</textarea>
+                                    @error('description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Maximum 1000 characters</small>
                                 </div>
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label for="product_type" class="form-label">Product Type</label>
-                                        <select class="form-select" id="product_type" name="product_type" required>
+                                        <label for="product_type" class="form-label">
+                                            Product Type <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select @error('product_type') is-invalid @enderror"
+                                            id="product_type" name="product_type" required>
+                                            <option value="">-- Select Product Type --</option>
                                             <option value="physical"
                                                 {{ old('product_type', $product->product_type ?? 'physical') == 'physical' ? 'selected' : '' }}>
                                                 Physical
@@ -61,10 +74,14 @@
                                                 Digital
                                             </option>
                                         </select>
+                                        @error('product_type')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                     <div class="col-md-6">
                                         <label for="category_id" class="form-label">Category</label>
-                                        <select class="form-select" id="category_id" name="category_id">
+                                        <select class="form-select @error('category_id') is-invalid @enderror"
+                                            id="category_id" name="category_id">
                                             <option value="">-- Select Category --</option>
                                             @foreach ($categories as $category)
                                                 <option value="{{ $category->id }}"
@@ -74,25 +91,38 @@
                                                 </option>
                                             @endforeach
                                         </select>
+                                        @error('category_id')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
                                 {{-- product Digital Basic --}}
-                                {{-- format (freetext) --}}
                                 <div class="row mb-3" id="digital-fields"
                                     style="{{ old('product_type', $product->product_type ?? 'physical') == 'digital' ? '' : 'display: none;' }}">
                                     <div class="col-md-6">
-                                        <label for="digital_type" class="form-label">Format</label>
-                                        {{-- freetext --}}
-                                        <input type="text" class="form-control" id="format" name="format"
+                                        <label for="format" class="form-label">
+                                            Format <span class="text-danger digital-required">*</span>
+                                        </label>
+                                        <input type="text" class="form-control @error('format') is-invalid @enderror"
+                                            id="format" name="format"
                                             value="{{ old('format', $product->format ?? '') }}"
                                             placeholder="e.g. PDF, EPUB, MP3">
+                                        @error('format')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="digital_size" class="form-label">File Size</label>
-                                        <input type="text" class="form-control" id="file_size" name="file_size"
-                                            value="{{ old('file_size', $product->file_size ?? '') }}"
+                                        <label for="file_size" class="form-label">
+                                            File Size <span class="text-danger digital-required">*</span>
+                                        </label>
+                                        <input type="text"
+                                            class="form-control @error('file_size') is-invalid @enderror" id="file_size"
+                                            name="file_size" value="{{ old('file_size', $product->file_size ?? '') }}"
                                             placeholder="e.g. 10MB, 500KB">
+                                        @error('file_size')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
@@ -113,6 +143,9 @@
                                                     digitalFields.style.display = 'none';
                                                     formatInput.required = false;
                                                     fileSizeInput.required = false;
+                                                    // Clear validation errors when hiding
+                                                    formatInput.classList.remove('is-invalid');
+                                                    fileSizeInput.classList.remove('is-invalid');
                                                 }
                                             }
 
@@ -225,8 +258,12 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="pricing_type" class="form-label">Pricing Type</label>
-                                    <select class="form-select" id="pricing_type" name="pricing_type" required>
+                                    <label for="pricing_type" class="form-label">
+                                        Pricing Type <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select @error('pricing_type') is-invalid @enderror"
+                                        id="pricing_type" name="pricing_type" required>
+                                        <option value="">-- Select Pricing Type --</option>
                                         <option value="basic"
                                             {{ old('pricing_type', $product->pricing_type ?? 'basic') == 'basic' ? 'selected' : '' }}>
                                             Basic</option>
@@ -235,19 +272,42 @@
                                             disabled>
                                             Using Variant</option> --}}
                                     </select>
+                                    @error('pricing_type')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
                                 <div id="basic-pricing-section" style="display: none;">
                                     <div class="row mb-3">
                                         <div class="col-md-6">
-                                            <label for="price" class="form-label">Price</label>
-                                            <input type="number" step="0.01" class="form-control" id="price"
-                                                name="price" value="{{ old('price', $product->price ?? '') }}">
+                                            <label for="price" class="form-label">
+                                                Price <span class="text-danger basic-required">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" step="0.01"
+                                                    class="form-control @error('price') is-invalid @enderror"
+                                                    id="price" name="price"
+                                                    value="{{ old('price', $product->price ?? '') }}" min="0"
+                                                    max="999999.99">
+                                            </div>
+                                            @error('price')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <small class="form-text text-muted">Maximum: $999,999.99</small>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="stock" class="form-label">Stock</label>
-                                            <input type="number" class="form-control" id="stock" name="stock"
-                                                value="{{ old('stock', $product->stock ?? 0) }}" min="0">
+                                            <input type="number"
+                                                class="form-control @error('stock') is-invalid @enderror"
+                                                id="stock" name="stock"
+                                                value="{{ old('stock', $product->stock ?? 0) }}" min="0"
+                                                max="999999">
+                                            @error('stock')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <small class="form-text text-muted">Leave blank or 0 for unlimited
+                                                stock</small>
                                         </div>
                                     </div>
                                 </div>
@@ -263,9 +323,9 @@
                                         <table class="table table-bordered align-middle mb-0" id="variant-table">
                                             <thead>
                                                 <tr>
-                                                    <th>Variant Name</th>
-                                                    <th>Price</th>
-                                                    <th>Stock</th>
+                                                    <th>Variant Name <span class="text-danger">*</span></th>
+                                                    <th>Price <span class="text-danger">*</span></th>
+                                                    <th>Stock <span class="text-danger">*</span></th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -279,21 +339,34 @@
                                                             <td>
                                                                 <input type="text"
                                                                     name="variants[{{ $i }}][name]"
-                                                                    class="form-control"
+                                                                    class="form-control @error('variants.' . $i . '.name') is-invalid @enderror"
                                                                     value="{{ $variant['name'] ?? '' }}" required>
+                                                                @error('variants.' . $i . '.name')
+                                                                    <div class="invalid-feedback">{{ $message }}
+                                                                    </div>
+                                                                @enderror
                                                             </td>
                                                             <td>
                                                                 <input type="number" step="0.01"
                                                                     name="variants[{{ $i }}][price]"
-                                                                    class="form-control"
-                                                                    value="{{ $variant['price'] ?? '' }}" required>
+                                                                    class="form-control @error('variants.' . $i . '.price') is-invalid @enderror"
+                                                                    value="{{ $variant['price'] ?? '' }}"
+                                                                    min="0" max="999999.99" required>
+                                                                @error('variants.' . $i . '.price')
+                                                                    <div class="invalid-feedback">{{ $message }}
+                                                                    </div>
+                                                                @enderror
                                                             </td>
                                                             <td>
                                                                 <input type="number"
                                                                     name="variants[{{ $i }}][stock]"
-                                                                    class="form-control"
+                                                                    class="form-control @error('variants.' . $i . '.stock') is-invalid @enderror"
                                                                     value="{{ $variant['stock'] ?? 0 }}"
-                                                                    min="0" required>
+                                                                    min="0" max="999999" required>
+                                                                @error('variants.' . $i . '.stock')
+                                                                    <div class="invalid-feedback">{{ $message }}
+                                                                    </div>
+                                                                @enderror
                                                             </td>
                                                             <td>
                                                                 <button type="button"
@@ -324,10 +397,15 @@
                                                     basicSection.style.display = 'none';
                                                     priceInput.required = false;
                                                     stockInput.required = false;
-                                                } else {
+                                                } else if (pricingTypeSelect.value === 'basic') {
                                                     variantSection.style.display = 'none';
                                                     basicSection.style.display = '';
                                                     priceInput.required = true;
+                                                    stockInput.required = false;
+                                                } else {
+                                                    variantSection.style.display = 'none';
+                                                    basicSection.style.display = 'none';
+                                                    priceInput.required = false;
                                                     stockInput.required = false;
                                                 }
                                             }
@@ -344,10 +422,10 @@
                                                     <input type="text" name="variants[${rowCount}][name]" class="form-control" required>
                                                 </td>
                                                 <td>
-                                                    <input type="number" step="0.01" name="variants[${rowCount}][price]" class="form-control" required>
+                                                    <input type="number" step="0.01" name="variants[${rowCount}][price]" class="form-control" min="0" max="999999.99" required>
                                                 </td>
                                                 <td>
-                                                    <input type="number" name="variants[${rowCount}][stock]" class="form-control" min="0" required>
+                                                    <input type="number" name="variants[${rowCount}][stock]" class="form-control" min="0" max="999999" required>
                                                 </td>
                                                 <td>
                                                     <button type="button" class="btn btn-danger btn-sm remove-variant-row"><i class="fa fa-trash"></i></button>
@@ -376,8 +454,6 @@
                             <div class="p-4">
                                 <div class="mb-3 text-center">
                                     Product Key Features
-                                    {{-- toogle on of --}}
-
                                 </div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="key_features_toggle"
@@ -401,8 +477,8 @@
                                             <thead>
                                                 <tr>
                                                     <th>Icon</th>
-                                                    <th>Name</th>
-                                                    <th>Description</th>
+                                                    <th>Name <span class="text-danger">*</span></th>
+                                                    <th>Description <span class="text-danger">*</span></th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -421,18 +497,33 @@
                                                             <td>
                                                                 <input type="text"
                                                                     name="keyfeatures[{{ $i }}][icon]"
-                                                                    class="form-control"
+                                                                    class="form-control @error('keyfeatures.' . $i . '.icon') is-invalid @enderror"
                                                                     value="{{ $kf['attribute_icon'] ?? '' }}"
                                                                     placeholder="e.g. fa-check">
+                                                                @error('keyfeatures.' . $i . '.icon')
+                                                                    <div class="invalid-feedback">{{ $message }}
+                                                                    </div>
+                                                                @enderror
                                                             </td>
                                                             <td>
                                                                 <input type="text"
                                                                     name="keyfeatures[{{ $i }}][name]"
-                                                                    class="form-control"
-                                                                    value="{{ $kf['attribute_name'] ?? '' }}">
+                                                                    class="form-control keyfeature-name @error('keyfeatures.' . $i . '.name') is-invalid @enderror"
+                                                                    value="{{ $kf['attribute_name'] ?? '' }}"
+                                                                    required>
+                                                                @error('keyfeatures.' . $i . '.name')
+                                                                    <div class="invalid-feedback">{{ $message }}
+                                                                    </div>
+                                                                @enderror
                                                             </td>
                                                             <td>
-                                                                <textarea name="keyfeatures[{{ $i }}][description]" class="form-control" rows="2">{{ $kf['attribute_value'] ?? '' }}</textarea>
+                                                                <textarea name="keyfeatures[{{ $i }}][description]"
+                                                                    class="form-control keyfeature-description @error('keyfeatures.' . $i . '.description') is-invalid @enderror"
+                                                                    rows="2" required>{{ $kf['attribute_value'] ?? '' }}</textarea>
+                                                                @error('keyfeatures.' . $i . '.description')
+                                                                    <div class="invalid-feedback">{{ $message }}
+                                                                    </div>
+                                                                @enderror
                                                             </td>
                                                             <td>
                                                                 <button type="button"
@@ -458,6 +549,17 @@
 
                                             function showHideSection() {
                                                 section.style.display = toggle.checked ? '' : 'none';
+
+                                                // Set required attribute based on toggle state
+                                                const nameInputs = section.querySelectorAll('.keyfeature-name');
+                                                const descInputs = section.querySelectorAll('.keyfeature-description');
+
+                                                nameInputs.forEach(input => {
+                                                    input.required = toggle.checked;
+                                                });
+                                                descInputs.forEach(input => {
+                                                    input.required = toggle.checked;
+                                                });
                                             }
                                             toggle.addEventListener('change', showHideSection);
                                             showHideSection();
@@ -470,10 +572,10 @@
                                                     <input type="text" name="keyfeatures[${rowCount}][icon]" class="form-control" placeholder="e.g. fa-solid fa-check">
                                                 </td>
                                                 <td>
-                                                    <input type="text" name="keyfeatures[${rowCount}][name]" class="form-control">
+                                                    <input type="text" name="keyfeatures[${rowCount}][name]" class="form-control keyfeature-name" required>
                                                 </td>
                                                 <td>
-                                                    <textarea name="keyfeatures[${rowCount}][description]" class="form-control" rows="2"></textarea>
+                                                    <textarea name="keyfeatures[${rowCount}][description]" class="form-control keyfeature-description" rows="2" required></textarea>
                                                 </td>
                                                 <td>
                                                     <button type="button" class="btn btn-danger btn-sm remove-keyfeature-row">
@@ -505,8 +607,18 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="gallery" class="form-label">Product Gallery Images</label>
-                                    <input type="file" class="form-control" id="gallery" name="gallery[]"
-                                        accept=".jpg, .jpeg, .png" multiple>
+                                    <input type="file"
+                                        class="form-control @error('gallery') is-invalid @enderror @error('gallery.*') is-invalid @enderror"
+                                        id="gallery" name="gallery[]" accept=".jpg,.jpeg,.png,.gif,.svg" multiple>
+                                    @error('gallery')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    @error('gallery.*')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">
+                                        Accepted formats: JPG, JPEG, PNG, GIF, SVG. Maximum size: 2MB per image.
+                                    </small>
                                     {{-- Preview selected images --}}
                                     <div id="gallery-preview" class="mt-2"></div>
                                     {{-- Display existing images if editing --}}

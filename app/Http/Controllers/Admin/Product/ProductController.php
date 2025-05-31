@@ -6,46 +6,65 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Display a listing of products.
+     */
+    public function index(Request $request): View
     {
-        $products = Product::query()
-            ->when($request->search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
-                });
-            })
-            ->paginate(10);
+        $query = Product::orderBy('created_at', 'desc');
 
+        if ($request->search) {
+            $searchInput = $request->search;
+            $query->where(function ($q) use ($searchInput) {
+                $q->where('name', 'LIKE', "%{$searchInput}%")
+                    ->orWhere('description', 'LIKE', "%{$searchInput}%");
+            });
+        }
+
+        $products = $query->paginate(10)->withQueryString();
         return view('admin.pages.products.index', compact('products'));
     }
 
-    public function create()
+    /**
+     * Show the form for creating a new product.
+     */
+    public function create(): View
     {
         return view('admin.pages.products.form', $this->getFormData());
     }
 
-    public function store(Request $request)
+    /**
+     * Store a newly created product in storage.
+     */
+    public function store(Request $request): RedirectResponse
     {
-        $validatedData = $this->validateProduct($request);
+        $validated = $this->validateRequest($request);
 
-        DB::transaction(function () use ($validatedData, $request) {
-            $product = Product::create($this->getProductData($validatedData));
+        return $this->withTransaction(function () use ($validated, $request) {
+            $product = Product::create($this->getProductData($validated));
 
             $this->handleDigitalFields($product, $request);
             $this->handleKeyFeatures($product, $request);
             $this->handleGallery($product, $request);
-        });
 
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Product created successfully.');
+            return redirect()
+                ->route('admin.products.index')
+                ->with('success', 'Product created successfully!');
+        }, 'Failed to create product.');
     }
 
-    public function edit(Product $product)
+    /**
+     * Show the form for editing the specified product.
+     */
+    public function edit(Product $product): View
     {
         $product->load(['details', 'media']);
 
@@ -55,38 +74,84 @@ class ProductController extends Controller
         ));
     }
 
-    public function update(Request $request, Product $product)
+    /**
+     * Update the specified product in storage.
+     */
+    public function update(Request $request, Product $product): RedirectResponse
     {
-        $validatedData = $this->validateProduct($request);
+        $validated = $this->validateRequest($request, $product->id);
 
-        DB::transaction(function () use ($validatedData, $request, $product) {
-            $product->update($this->getProductData($validatedData));
+        return $this->withTransaction(function () use ($validated, $request, $product) {
+            $product->update($this->getProductData($validated));
 
             $this->handleDigitalFields($product, $request);
             $this->handleKeyFeaturesUpdate($product, $request);
             $this->handleGalleryUpdate($product, $request);
-        });
 
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Product updated successfully.');
+            return redirect()
+                ->route('admin.products.index')
+                ->with('success', 'Product updated successfully!');
+        }, 'Failed to update product.');
     }
 
-    public function destroy(Product $product)
+    /**
+     * Remove the specified product from storage.
+     */
+    public function destroy(Product $product): RedirectResponse
     {
-        DB::transaction(function () use ($product) {
+        return $this->withTransaction(function () use ($product) {
+            $productName = $product->name;
+
             $product->clearMediaCollection('product_images');
             $product->details()->delete();
             $product->delete();
-        });
 
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Product deleted successfully.');
+            return redirect()
+                ->route('admin.products.index')
+                ->with('success', "Product '{$productName}' deleted successfully!");
+        }, 'Failed to delete product.');
     }
 
-    // Private helper methods
-    private function getFormData($method = 'POST', $action = null)
+    /**
+     * Get products by category (for API or AJAX calls).
+     */
+    public function getByCategory(Request $request)
     {
-        $categories = Category::all();
+        $categoryId = $request->get('category_id');
+
+        if (!$categoryId || !Category::where('id', $categoryId)->exists()) {
+            return response()->json(['error' => 'Invalid category'], 400);
+        }
+
+        $products = Product::where('category_id', $categoryId)
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug', 'price']);
+
+        return response()->json($products);
+    }
+
+    /**
+     * Search products (for API or AJAX calls).
+     */
+    public function search(Request $request)
+    {
+        $query = $request->get('q', '');
+
+        $products = Product::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('description', 'LIKE', "%{$query}%")
+            ->orderBy('name')
+            ->limit(10)
+            ->get(['id', 'name', 'product_type', 'price']);
+
+        return response()->json($products);
+    }
+
+    /**
+     * DRY: Get form data for create/edit views.
+     */
+    private function getFormData(string $method = 'POST', string $action = null): array
+    {
+        $categories = Category::orderBy('name')->get();
 
         return [
             'method' => $method,
@@ -100,33 +165,95 @@ class ProductController extends Controller
         ];
     }
 
-    private function validateProduct(Request $request)
+    /**
+     * DRY: Validate product request.
+     */
+    private function validateRequest(Request $request, $ignoreId = null): array
     {
         return $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'product_type' => 'required|in:digital,physical',
-            'price' => 'required|numeric|min:0',
+            'name' => [
+                'required',
+                'string',
+                'min:2',
+                'max:255',
+                Rule::unique('products', 'name')->ignore($ignoreId)
+            ],
+            'description' => 'nullable|string|max:1000',
+            'product_type' => [
+                'required',
+                'string',
+                'in:digital,physical'
+            ],
+            'price' => [
+                'required',
+                'numeric',
+                'min:0',
+                'max:999999.99'
+            ],
             'category_id' => 'nullable|exists:categories,id',
-            'stock' => 'integer|min:0',
+            'stock' => 'integer|min:0|max:999999',
             'gallery.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ], [
+            'name.required' => 'Product name is required.',
+            'name.min' => 'Product name must be at least 2 characters.',
+            'name.max' => 'Product name cannot exceed 255 characters.',
+            'name.unique' => 'This product name already exists.',
+            'product_type.required' => 'Product type is required.',
+            'product_type.in' => 'Product type must be either digital or physical.',
+            'price.required' => 'Price is required.',
+            'price.numeric' => 'Price must be a valid number.',
+            'price.min' => 'Price cannot be negative.',
+            'price.max' => 'Price cannot exceed 999,999.99.',
+            'stock.integer' => 'Stock must be a valid integer.',
+            'stock.min' => 'Stock cannot be negative.',
+            'stock.max' => 'Stock cannot exceed 999,999.',
+            'category_id.exists' => 'Selected category does not exist.',
+            'gallery.*.image' => 'Gallery files must be images.',
+            'gallery.*.mimes' => 'Gallery images must be jpeg, png, jpg, gif, or svg.',
+            'gallery.*.max' => 'Gallery images cannot exceed 2MB.',
         ]);
     }
 
-    private function getProductData(array $validatedData)
+    /**
+     * DRY: Get product data array for create/update.
+     */
+    private function getProductData(array $validated): array
     {
         return [
-            'name' => $validatedData['name'],
-            'slug' => \Str::slug($validatedData['name']),
-            'description' => $validatedData['description'],
-            'product_type' => $validatedData['product_type'],
-            'price' => $validatedData['price'],
-            'category_id' => $validatedData['category_id'],
-            'stock' => $validatedData['stock'] ?? 0,
+            'name' => trim($validated['name']),
+            'slug' => $this->generateSlug($validated['name']),
+            'description' => $validated['description'],
+            'product_type' => $validated['product_type'],
+            'price' => $validated['price'],
+            'category_id' => $validated['category_id'],
+            'stock' => $validated['stock'] ?? 0,
         ];
     }
 
-    private function handleDigitalFields(Product $product, Request $request)
+    /**
+     * Generate a unique slug from the product name.
+     */
+    private function generateSlug(string $name): string
+    {
+        $slug = strtolower(trim($name));
+        $slug = preg_replace('/[^a-z0-9-]/', '-', $slug);
+        $slug = preg_replace('/-+/', '-', $slug);
+        $slug = trim($slug, '-');
+
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while (Product::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $counter++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Handle digital product specific fields.
+     */
+    private function handleDigitalFields(Product $product, Request $request): void
     {
         if ($product->product_type === 'digital') {
             $product->update([
@@ -136,7 +263,10 @@ class ProductController extends Controller
         }
     }
 
-    private function handleKeyFeatures(Product $product, Request $request)
+    /**
+     * Handle key features for new products.
+     */
+    private function handleKeyFeatures(Product $product, Request $request): void
     {
         if ($request->has_key_features !== 'on' || !$request->keyfeatures) {
             return;
@@ -151,7 +281,10 @@ class ProductController extends Controller
         }
     }
 
-    private function handleKeyFeaturesUpdate(Product $product, Request $request)
+    /**
+     * Handle key features update for existing products.
+     */
+    private function handleKeyFeaturesUpdate(Product $product, Request $request): void
     {
         if ($request->has_key_features !== 'on') {
             $product->details()->delete();
@@ -179,7 +312,10 @@ class ProductController extends Controller
         }
     }
 
-    private function handleGallery(Product $product, Request $request)
+    /**
+     * Handle gallery upload for new products.
+     */
+    private function handleGallery(Product $product, Request $request): void
     {
         if ($request->hasFile('gallery')) {
             $product->addMultipleMediaFromRequest(['gallery'])
@@ -187,7 +323,10 @@ class ProductController extends Controller
         }
     }
 
-    private function handleGalleryUpdate(Product $product, Request $request)
+    /**
+     * Handle gallery update for existing products.
+     */
+    private function handleGalleryUpdate(Product $product, Request $request): void
     {
         // Remove images not in existing_gallery
         if ($request->has('existing_gallery') && is_array($request->existing_gallery)) {
@@ -201,5 +340,31 @@ class ProductController extends Controller
         }
 
         $this->handleGallery($product, $request);
+    }
+
+    /**
+     * DRY: Handle DB transactions and exceptions.
+     */
+    private function withTransaction(callable $callback, string $defaultErrorMessage): RedirectResponse
+    {
+        DB::beginTransaction();
+
+        try {
+            $response = $callback();
+            DB::commit();
+            return $response;
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            $errorMessage = $defaultErrorMessage;
+            if (!app()->environment('production')) {
+                $errorMessage .= ' Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine();
+            }
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $errorMessage);
+        }
     }
 }
