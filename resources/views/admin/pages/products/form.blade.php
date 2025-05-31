@@ -24,6 +24,7 @@
 
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-4">
                 <form method="POST" action="{{ $action }}" enctype="multipart/form-data">
+                    {{-- basic Information --}}
                     <div class="card border-0 shadow-sm">
 
                         <div class="card-body p-0">
@@ -215,6 +216,7 @@
                         </div>
                     </div>
 
+                    {{-- product Pricing --}}
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-0">
                             <div class="p-4">
@@ -368,6 +370,7 @@
                     </div>
 
 
+                    {{-- Key Feature (detail) --}}
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-0">
                             <div class="p-4">
@@ -379,14 +382,14 @@
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="key_features_toggle"
                                         name="has_key_features"
-                                        {{ old('has_key_features', $product->has_key_features ?? false) ? 'checked' : '' }}>
+                                        {{ old('has_key_features', $product->details->count() > 0 ?? false) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="key_features_toggle">Enable Key
                                         Features</label>
                                 </div>
 
                                 {{-- Dynamic Key Features --}}
                                 <div id="key_features_section"
-                                    style="{{ old('has_key_features', $product->has_key_features ?? false) ? '' : 'display: none;' }}">
+                                    style="{{ old('has_key_features', $product->details->count() > 0 ?? false) ? '' : 'display: none;' }}">
                                     <div class="mb-2">
                                         <button type="button" class="btn btn-outline-primary btn-sm"
                                             id="add-keyfeature-row">
@@ -405,26 +408,31 @@
                                             </thead>
                                             <tbody>
                                                 @php
-                                                    $keyfeatures = old('keyfeatures', $product->keyfeatures ?? []);
+                                                    $keyfeatures = old('keyfeatures', $product->details ?? []);
                                                 @endphp
                                                 @if (!empty($keyfeatures))
                                                     @foreach ($keyfeatures as $i => $kf)
                                                         <tr>
+                                                            {{-- hidden id --}}
+                                                            <input type="hidden"
+                                                                name="keyfeatures[{{ $i }}][id]"
+                                                                value="{{ $kf['id'] ?? '' }}">
+                                                            {{-- key feature input --}}
                                                             <td>
                                                                 <input type="text"
                                                                     name="keyfeatures[{{ $i }}][icon]"
                                                                     class="form-control"
-                                                                    value="{{ $kf['icon'] ?? '' }}"
+                                                                    value="{{ $kf['attribute_icon'] ?? '' }}"
                                                                     placeholder="e.g. fa-check">
                                                             </td>
                                                             <td>
                                                                 <input type="text"
                                                                     name="keyfeatures[{{ $i }}][name]"
                                                                     class="form-control"
-                                                                    value="{{ $kf['name'] ?? '' }}">
+                                                                    value="{{ $kf['attribute_name'] ?? '' }}">
                                                             </td>
                                                             <td>
-                                                                <textarea name="keyfeatures[{{ $i }}][description]" class="form-control" rows="2">{{ $kf['description'] ?? '' }}</textarea>
+                                                                <textarea name="keyfeatures[{{ $i }}][description]" class="form-control" rows="2">{{ $kf['attribute_value'] ?? '' }}</textarea>
                                                             </td>
                                                             <td>
                                                                 <button type="button"
@@ -501,14 +509,27 @@
                                         accept=".jpg, .jpeg, .png" multiple>
                                     {{-- Preview selected images --}}
                                     <div id="gallery-preview" class="mt-2"></div>
-                                    {{-- @if (isset($product) && $product->gallery)
-                                        <div class="mt-2">
-                                            @foreach ($product->gallery as $image)
-                                                <img src="{{ asset('storage/' . $image) }}" alt="Gallery Image"
-                                                    class="img-thumbnail me-2 mb-2" style="max-width: 100px;">
-                                            @endforeach
+                                    {{-- Display existing images if editing --}}
+                                    @if (isset($product) && $product->media->count() > 0)
+                                        <div class="mt-3">
+                                            <h5>Existing Images:</h5>
+                                            <div class="d-flex flex-wrap" id="existing-gallery">
+                                                @foreach ($product->media as $media)
+                                                    <div class="position-relative me-2 mb-2"
+                                                        style="display:inline-block;">
+                                                        <img src="{{ $media->getUrl() }}" class="img-thumbnail"
+                                                            style="max-width: 100px;">
+                                                        <button type="button"
+                                                            class="btn btn-danger btn-sm position-absolute top-0 end-0 remove-existing-image"
+                                                            style="z-index:2; padding:0.1rem 0.4rem; font-size:0.8rem;"
+                                                            data-media-id="{{ $media->id }}">&times;</button>
+                                                        <input type="hidden" name="existing_gallery[]"
+                                                            value="{{ $media->id }}">
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         </div>
-                                    @endif --}}
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -538,6 +559,25 @@
                                         });
                                     }
                                 });
+
+                                // Remove existing image preview
+                                const existingGallery = document.getElementById('existing-gallery');
+                                if (existingGallery) {
+                                    existingGallery.addEventListener('click', function(e) {
+                                        if (e.target.classList.contains('remove-existing-image')) {
+                                            const wrapper = e.target.closest('.position-relative');
+                                            if (wrapper) {
+                                                // Remove the hidden input so it won't be submitted
+                                                const hiddenInput = wrapper.querySelector(
+                                                    'input[type="hidden"][name="existing_gallery[]"]');
+                                                if (hiddenInput) {
+                                                    hiddenInput.remove();
+                                                }
+                                                wrapper.remove();
+                                            }
+                                        }
+                                    });
+                                }
                             });
                         </script>
                     @endpush
