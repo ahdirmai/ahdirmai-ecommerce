@@ -1,3 +1,68 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Custom Fonts */
+body {
+    font-family: "Space Grotesk", sans-serif;
+}
+
+/* Custom Animations */
+.animate-fade-in {
+    animation: fadeIn 0.8s forwards;
+}
+
+.animate-width {
+    animation: expandWidth 0.8s forwards;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.8s forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes expandWidth {
+    from {
+        width: 0;
+    }
+    to {
+        width: 80px;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Mobile Menu */
+.mobile-menu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.mobile-menu.active {
+    max-height: 300px;
+}
+
+/* Dark Mode Transition */
+.dark-transition {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
