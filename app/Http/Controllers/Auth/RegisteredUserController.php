@@ -27,11 +27,14 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
+        // return $request->all();
         $request->validate([
+            // 1MB max, png, jpg, jpeg, gif, webp
+            'avatar' => ['required', 'image', 'max:1024', 'mimes:png,jpg,jpeg,gif,webp'],
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -40,6 +43,14 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            $user->addMediaFromRequest('avatar')
+                ->toMediaCollection('avatars');
+        }
+        // set user role
+        $user->assignRole('user');
 
         event(new Registered($user));
 
