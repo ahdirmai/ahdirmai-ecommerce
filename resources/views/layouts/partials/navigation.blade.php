@@ -16,7 +16,8 @@
                 </a>
             </li>
             <li>
-                <a href="#featured" class="hover:text-gray-700 dark:hover:text-gray-300">
+                <a href="{{ request()->routeIs('dashboard') ? '#featured' : route('products.index') }}"
+                    class="hover:text-gray-700 dark:hover:text-gray-300">
                     Product
                 </a>
             </li>

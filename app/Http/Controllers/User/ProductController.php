@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -13,18 +14,56 @@ class ProductController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::all()->load(['category', 'media']);
-        // return 'all product';
-        // Here you would typically fetch products from the database
-        // For example:
-        // $products = Product::all();
+        $query = Product::query()->with(['category', 'media']);
+
+        // Filter by categories (expects array of category slug)
+        if ($request->filled('categories')) {
+            $categories = is_array($request->categories) ? $request->categories : [$request->categories];
+            $query->whereHas('category', function ($q) use ($categories) {
+                $q->whereIn('slug', $categories);
+            });
+        }
+
+        // Filter by product_type (expects string or array)
+        if ($request->filled('product_type')) {
+            $query->where('product_type', $request->product_type);
+        }
+
+        // Handle sort
+        if ($request->filled('sort')) {
+            $sort = $request->sort;
+            switch ($sort) {
+                case 'newest':
+                    $query->orderByDesc('created_at');
+                    break;
+                case 'price_asc':
+                    $query->orderBy('price', 'asc');
+                    break;
+                case 'price_desc':
+                    $query->orderBy('price', 'desc');
+                    break;
+                default:
+                    // No sorting or fallback
+                    break;
+            }
+        }
+
+        $products = $query->paginate(15)->withQueryString();
+        $categories = Category::all();
 
         $data = [
-            'products' => $products
+            'products' => $products,
+            'categories' => $categories,
+            'categoryOptions' => $categories->map(fn($category) => [
+                'value' => $category->id,
+                'slug' => $category->slug,
+                'text' => $category->name,
+                'product_type' => $category->type,
+            ])->values()->all()
         ];
-        // For now, we'll return a simple view
+
         return view('user.product.index', $data);
     }
 

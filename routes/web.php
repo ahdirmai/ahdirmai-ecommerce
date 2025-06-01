@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::get('/', [UserDashboardController::class, 'index'])->name('dashboard');
-Route::get('/product', [UserProductController::class, 'index'])->name('products.index');
+Route::get('/products', [UserProductController::class, 'index'])->name('products.index');
 Route::get('/product/{slug}', [UserProductController::class, 'show'])->name('products.show');
 
 Route::middleware('auth')->group(function () {

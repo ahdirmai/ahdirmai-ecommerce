@@ -13,6 +13,12 @@
         <div class="text-sm text-gray-500 dark:text-gray-400">
             {{-- href to  route('product.show',$product->slug) --}}
             {{ $product->category->name }}
+            {{-- badge pysical or Digital --}}
+            @if ($product->product_type === 'physical')
+                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">Physical</span>
+            @else
+                <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">Digital</span>
+            @endif
 
         </div>
         <h3 class="font-semibold text-lg leading-tight my-1">
@@ -35,7 +41,7 @@
 
         <div class="flex items-center gap-2 mt-2">
             <span class="text-black dark:text-white font-semibold">
-                ${{ number_format($product['price'], 2) }}
+                Rp. {{ number_format($product['price'], 2) }}
             </span>
             @if (isset($product['old_price']))
                 <span class="line-through text-gray-400">
