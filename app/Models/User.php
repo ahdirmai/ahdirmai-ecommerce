@@ -48,4 +48,22 @@ class User extends Authenticatable implements HasMedia
             'password' => 'hashed',
         ];
     }
+
+    // has one cart
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+
+    // has many orders
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    // has many addresses
+    public function addresses()
+    {
+        return $this->hasMany(ShippingAddress::class);
+    }
 }

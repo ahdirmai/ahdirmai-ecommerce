@@ -13,7 +13,8 @@
                 <ul class="flex space-x-2 text-sm">
                     <li><a href="{{ route('dashboard') }}" class="text-blue-600 hover:underline">Home</a></li>
                     <li class="text-gray-500">/</li>
-                    <li><a href="#" class="text-blue-600 hover:underline">UI Kits</a></li>
+                    <li><a href="#"
+                            class="text-blue-600 hover:underline">{{ ucfirst($product->category->name) }}</a></li>
                     <li class="text-gray-500">/</li>
                     <li class="text-gray-600">{{ ucfirst($product->name) }}</li>
                 </ul>
@@ -116,11 +117,23 @@
                                     class="quantity-btn plus bg-gray-100 px-3 py-2 text-lg font-medium hover:bg-gray-200">+</button>
                             </div> --}}
 
-                            <button
-                                class="btn btn-primary add-to-cart-btn bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center"
-                                id="addToCart" data-id="1">
-                                <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
-                            </button>
+                            @auth
+                                <form action="{{ route('user.cart.add') }}" method="POST" class="inline">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <button type="submit"
+                                        class="btn btn-primary add-to-cart-btn bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center"
+                                        id="addToCart">
+                                        <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                                    </button>
+                                </form>
+                            @else
+                                <a href="{{ route('login', ['redirect' => request()->fullUrl()]) }}"
+                                    class="btn btn-primary add-to-cart-btn bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center justify-center"
+                                    id="addToCart">
+                                    <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                                </a>
+                            @endauth
 
                             <button
                                 class="btn btn-outline border border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium flex items-center justify-center">

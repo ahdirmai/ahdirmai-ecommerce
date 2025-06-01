@@ -19,13 +19,17 @@
 </head>
 
 <body class="bg-white dark:bg-gray-900 text-black dark:text-white dark-transition">
+    @include('sweetalert::alert')
     @include('layouts.partials.navigation')
 
     <main>
         {{ $slot }}
     </main>
 
+
     @include('layouts.partials.footer')
+
+    @stack('modal-section')
     @stack('after-scripts')
 </body>
 

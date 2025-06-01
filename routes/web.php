@@ -4,9 +4,14 @@ use App\Http\Controllers\Admin\Category\CategoryController;
 use App\Http\Controllers\Admin\Dashboard\DashboardController;
 use App\Http\Controllers\Admin\Product\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\AddressController;
+use App\Http\Controllers\User\CartController;
+use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\User\ProductController as UserProductController;
+use App\Http\Controllers\User\ProfileController as UserProfileController;
 use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Contracts\Role;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -17,9 +22,38 @@ Route::get('/products', [UserProductController::class, 'index'])->name('products
 Route::get('/product/{slug}', [UserProductController::class, 'show'])->name('products.show');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', function () {
-        return 'profile show';
-    })->name('profile.show');
+    Route::get('/profile', [UserProfileController::class, 'index'])->name('profile.show');
+    Route::get('/profile/edit', [UserProfileController::class, 'edit'])->name('user.profile.edit');
+    Route::put('/profile/update-info', [UserProfileController::class, 'updateInfo'])->name('user.profile.update.info');
+    Route::put('/profile/update-password', [UserProfileController::class, 'updatePassword'])->name('user.profile.update.password');
+
+
+    // CRUD Address
+    Route::get('/address', [AddressController::class, 'index'])->name('user.address.index');
+    Route::post('/address/store', [AddressController::class, 'store'])->name('user.address.store');
+    Route::put('/address/update/{address}', [AddressController::class, 'update'])->name('user.address.update');
+    Route::delete('/address/delete/{address}', [AddressController::class, 'deleteAddress'])->name('user.address.delete');
+    Route::patch('/address/set-default/{address}', [AddressController::class, 'setDefaultAddress'])->name('user.address.set_default');
+    Route::patch('/address/set-active/{address}', [AddressController::class, 'setActiveAddress'])->name('user.address.set_active');
+    Route::patch('/address/set-inactive/{address}', [AddressController::class, 'setInactiveAddress'])->name('user.address.set_inactive');
+
+    Route::get('/cart', [CartController::class, 'index'])->name('user.cart.index');
+    Route::get('/modal-cart', [CartController::class, 'getModalCart'])->name('user.modal.cart');
+    Route::post('/cart/add', [CartController::class, 'addToCart'])->name('user.cart.add');
+
+
+    // /cart/decrement/
+    Route::post('/cart/decrement/{itemsId}', [CartController::class, 'decrementCart'])->name('user.cart.decrement');
+    Route::post('/cart/increment/{itemsId}', [CartController::class, 'incrementCart'])->name('user.cart.increment');
+    Route::post('/cart/remove/{itemsId}', [CartController::class, 'removeCart'])->name('user.cart.remove');
+
+
+
+    Route::post('/cart/checkout', [CartController::class, 'cartCheckout'])->name('user.cart.checkout');
+
+
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('user.checkout.index');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('user.checkout.process');
     // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     // Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
