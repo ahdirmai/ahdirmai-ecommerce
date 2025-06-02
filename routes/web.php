@@ -8,6 +8,7 @@ use App\Http\Controllers\User\AddressController;
 use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\User\OrderController;
 use App\Http\Controllers\User\ProductController as UserProductController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
 use Illuminate\Support\Facades\Route;
@@ -54,9 +55,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('user.checkout.index');
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('user.checkout.process');
-    // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    // Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
+    Route::get('/order/{order}', [OrderController::class, 'show'])->name('user.order.show');
+    Route::get('/order/{order}/upload-proof', [OrderController::class, 'getUploadProof'])->name('user.order.get-upload-proof');
+    Route::POST('/order/{order}/upload-proof', [OrderController::class, 'uploadProof'])->name('user.order.store-upload-proof');
+    Route::post('/order/{order}/cancel', [OrderController::class, 'cancelOrder'])->name('user.order.cancel');
 });
 
 // admin routes

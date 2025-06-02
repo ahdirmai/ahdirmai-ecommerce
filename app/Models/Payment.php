@@ -31,4 +31,9 @@ class Payment extends Model
     {
         return ucfirst($value); // Capitalize the status value
     }
+    // payment history
+    public function paymentHistories()
+    {
+        return $this->hasMany(PaymentHistory::class);
+    }
 }

@@ -8,6 +8,11 @@ class Order extends Model
 {
     protected $guarded = [];
 
+    public function getRouteKeyName()
+    {
+        return 'order_number'; // Assuming you want to use order_number as the route key
+    }
+
     // user
     public function user()
     {
@@ -19,6 +24,20 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    // payment
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
+
+
+    // shipping address
+    public function OrderShippingAddress()
+    {
+        return $this->hasOne(OrderShippingAddress::class);
+    }
+    // payment
 
     // total price
     // public function getTotalPriceAttribute()

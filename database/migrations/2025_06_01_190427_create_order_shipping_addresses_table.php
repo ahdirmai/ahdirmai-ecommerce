@@ -23,8 +23,6 @@ return new class extends Migration
             $table->string('country');
             $table->string('phone_number')->nullable();
             $table->string('email')->nullable(); // Optional email for the shipping address
-            $table->boolean('is_default')->default(false); // To mark the default shipping address
-            $table->boolean('is_active')->default(true); // To mark if the address is active or not
             $table->string('label')->nullable(); // Optional label for the address (e.g., "Home", "Office")
             $table->timestamps();
         });
