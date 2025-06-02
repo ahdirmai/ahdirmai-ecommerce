@@ -5,19 +5,32 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\PaymentHistory;
 use Illuminate\Http\Request;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class OrderController extends Controller
 {
-    // Route::get('/order/{order}', [OrderController::class, 'show'])->name('user.order.show');
-    // Route::get('/order/{order}/upload-proof', [OrderController::class, 'uploadProof'])->name('user.checkout.upload-proof');
-    // Route::POST('/order/{order}/upload-proof', [OrderController::class, 'uploadProof'])->name('user.checkout.upload-proof');
-    // Route::post('/order/{order}/cancel', [OrderController::class, 'cancelOrder'])->name('user.order.cancel');
-    public function show($order)
+    public function  index()
     {
-        // Logic to show order details
-        // You can use the Order model to fetch the order by its ID or order number
-        // return view('user.order.show', compact('order'));
+        // get all orders for the authenticated user
+        $orders = Order::where('user_id', auth()->id())->with('items.product')->get();
+
+        $order_pending = $orders->where('status', 'pending');
+
+
+        $data = [
+            'orders' => $orders, // Orders with status 'pending'
+        ];
+        return view('user.order.index', $data);
+    }
+    public function show(Order $order)
+    {
+
+        $data = [
+            'order' => $order->load('items.product', 'payment', 'payment.paymentHistories'), // Load order items with product details
+        ];
+        return view('user.order.show', $data);
     }
     public function getUploadProof(Order $order)
     {
@@ -55,7 +68,8 @@ class OrderController extends Controller
         // $table->string('sender_name')->nullable();
         // $table->string('status')->default('pending');
         // create payment history
-        $payment->paymentHistories()->create([
+        $payment_history = PaymentHistory::create([
+            'payment_id' => $payment->id,
             'user_id' => auth()->id(),
             'amount' => $payment->amount, // Assuming amount is stored in the payment model
             'payment_method' => $payment->payment_method, // e.g., 'bank_transfer'
@@ -64,6 +78,16 @@ class OrderController extends Controller
             'status' => 'pending', // Set initial status to pending
         ]);
 
+        // Handle file upload using spatie media library accociate with payment history
+        if ($request->hasFile('proof')) {
+            $file = $request->file('proof');
+            // Store the file in the 'proofs' collection
+            $payment_history->addMedia($file)->toMediaCollection('proofs');
+        } else {
+            return redirect()->back()->withErrors(['proof' => 'Proof of payment is required.']);
+        }
+
+        Alert::success('Success', 'Proof of payment uploaded successfully.');
 
         // Show success message
         return redirect()->route('user.order.show', ['order' => $order])->with('success', 'Proof of payment uploaded successfully.');

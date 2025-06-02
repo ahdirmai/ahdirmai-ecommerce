@@ -17,7 +17,22 @@ class CartController extends Controller
 
     public function index()
     {
-        return 'cart index';
+        $user_cart = Cart::where('user_id', Auth::user()->id)->first();
+        if (!$user_cart) {
+            Alert::info('Info', 'Your cart is empty!');
+            return view('user.cart.index', ['cartItems' => []]);
+        }
+
+        $cartItems = $user_cart->items()->with('product')->get();
+
+        $data = [
+            'cartItems' => $cartItems,
+            // 'totalPrice' => $cartItems->sum(function ($item) {
+            //     return $item->product->price * $item->quantity;
+            // }),
+        ];
+
+        return view('user.cart.index', $data);
     }
 
     public function getModalCart()

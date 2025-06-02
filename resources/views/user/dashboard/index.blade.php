@@ -48,7 +48,10 @@
                         <i class="fas {{ $category['icon'] }} text-3xl mb-4 text-black dark:text-white"></i>
                         <h3 class="text-lg font-semibold mb-2">{{ $category['name'] }}</h3>
                         <p class="text-gray-600 dark:text-gray-300 mb-4">{{ $category['description'] }}</p>
-                        <a href="#" class="text-black dark:text-white font-semibold hover:underline">
+                        <a href="{{ route('products.index', [
+                            'categories' => $category->slug,
+                        ]) }}"
+                            class="text-black dark:text-white font-semibold hover:underline">
                             Explore <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
@@ -82,7 +85,7 @@
     </section>
 
     <!-- Testimonials Section -->
-    <section id="testimonials" class="py-20 bg-gray-100 dark:bg-gray-800 dark-transition">
+    {{-- <section id="testimonials" class="py-20 bg-gray-100 dark:bg-gray-800 dark-transition">
         <div class="max-w-7xl mx-auto px-4">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold">WHAT OUR CUSTOMERS SAY</h2>
@@ -132,6 +135,6 @@
                     </div>
                 @endforeach
             </div>
-        </div>
-    </section>
+        </div> --}}
+    {{-- </section> --}}
 </x-app-layout>

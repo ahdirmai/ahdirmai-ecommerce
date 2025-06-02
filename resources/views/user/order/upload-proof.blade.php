@@ -11,11 +11,18 @@
                         <ul class="flex space-x-2 text-sm">
                             <li><a href="{{ route('dashboard') }}" class="text-blue-600 hover:underline">Home</a></li>
                             <li class="text-gray-500">/</li>
-                            <li><a href="{{ route('user.cart.index') }}" class="text-blue-600 hover:underline">Order</a>
+                            <li><a href="{{ route('user.order.index') }}"
+                                    class="text-blue-600 hover:underline">Order</a>
                             </li>
                             <li class="text-gray-500">/</li>
                             <li class="text-gray-600">Upload Bukti Transfer</li>
                         </ul>
+                        <div class="mt-4">
+                            <a href="{{ route('user.order.index') }}"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+                                <i class="fas fa-arrow-left mr-2"></i> Kembali ke Order Page
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

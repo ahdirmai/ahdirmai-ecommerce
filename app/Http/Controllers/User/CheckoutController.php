@@ -95,7 +95,7 @@ class CheckoutController extends Controller
                 'amount' => $total_amount,
                 'status' => 'pending',
                 'payment_method' => $request->payment_method,
-                'ammount_paid' => 0, // Set this after payment gateway response
+                'amount_paid' => 0, // Set this after payment gateway response
                 'transaction_id' => null, // Set this after payment gateway response
                 // 'transaction_id' => null, // Set this after payment gateway response
             ]);

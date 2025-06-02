@@ -26,8 +26,8 @@
         </ul>
 
         <div class="flex items-center space-x-4">
-            <i class="fas fa-search cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"></i>
-            <i id="darkModeToggle" class="fas fa-moon cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"></i>
+            {{-- <i class="fas fa-search cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"></i> --}}
+            {{-- <i id="darkModeToggle" class="fas fa-moon cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"></i> --}}
             @guest
                 <div class="relative">
                     <button id="userDropdownGuest" class="focus:outline-none">

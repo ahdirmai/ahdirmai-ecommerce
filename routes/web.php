@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('user.checkout.process');
 
 
+    Route::get('/orders', [OrderController::class, 'index'])->name('user.order.index');
     Route::get('/order/{order}', [OrderController::class, 'show'])->name('user.order.show');
     Route::get('/order/{order}/upload-proof', [OrderController::class, 'getUploadProof'])->name('user.order.get-upload-proof');
     Route::POST('/order/{order}/upload-proof', [OrderController::class, 'uploadProof'])->name('user.order.store-upload-proof');

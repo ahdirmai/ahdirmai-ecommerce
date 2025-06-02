@@ -13,11 +13,19 @@
                 <ul class="flex space-x-2 text-sm">
                     <li><a href="{{ route('dashboard') }}" class="text-blue-600 hover:underline">Home</a></li>
                     <li class="text-gray-500">/</li>
-                    <li><a href="#"
+                    <li><a href="{{ route('products.index', [
+                        'categories' => $product->category->slug,
+                    ]) }}"
                             class="text-blue-600 hover:underline">{{ ucfirst($product->category->name) }}</a></li>
                     <li class="text-gray-500">/</li>
                     <li class="text-gray-600">{{ ucfirst($product->name) }}</li>
                 </ul>
+                <div class="mt-4">
+                    <a href="{{ route('products.index') }}"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-arrow-left mr-2"></i> Back to Products
+                    </a>
+                </div>
             </div>
             {{-- </div> --}}
             <div class="container mx-auto px-4">

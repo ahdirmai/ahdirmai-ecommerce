@@ -14,6 +14,13 @@
                             <li class="text-gray-600">Products</li>
                         </ul>
                     </div>
+                    {{-- back to home --}}
+                    <div class="mt-4">
+                        <a href="{{ route('dashboard') }}"
+                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-arrow-left mr-2"></i> Back to Home
+                        </a>
+                    </div>
                 </div>
             </div>
             <!-- Main Content -->

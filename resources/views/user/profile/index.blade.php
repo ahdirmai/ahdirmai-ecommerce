@@ -35,11 +35,11 @@
                             class="w-full border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-medium flex items-center justify-center transition">
                             <i class="fas fa-map-marker-alt mr-2"></i> Alamat Saya
                         </a>
-                        <a {{-- href="{{ route('user.cart.index') }}" --}}
+                        <a href="{{ route('user.cart.index') }}"
                             class="w-full border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-medium flex items-center justify-center transition">
                             <i class="fas fa-shopping-cart mr-2"></i> Cart
                         </a>
-                        <a {{-- href="{{ route('user.orders.index') }}" --}}
+                        <a href="{{ route('user.order.index') }}"
                             class="w-full border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-medium flex items-center justify-center transition">
                             <i class="fas fa-box mr-2"></i> Pesanan Saya
                         </a>
