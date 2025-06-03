@@ -37,11 +37,19 @@ class CartController extends Controller
 
     public function getModalCart()
     {
-        $user_cart = Cart::where('user_id', Auth::user()->id)->first()->load('items.product');
+        // $user_cart =
+        $user_cart = Cart::where('user_id', Auth::user()->id)->first();
+
+        if (!$user_cart) {
+            $user_cart = Cart::create([
+                'user_id' => Auth::user()->id
+            ]);
+        }
+        $user_cart = $user_cart->load('items.product');
 
 
         $data = [
-            'cartItems' => $user_cart->items,
+            'cartItems' => $user_cart?->items ?? [],
         ];
 
         // Logic to retrieve cart items and return a view or JSON response

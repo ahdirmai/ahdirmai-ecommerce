@@ -15,14 +15,14 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->unsignedBigInteger('payment_id');
+            $table->uuid('payment_id');
             $table->foreign('payment_id')->references('id')->on('payments')->onDelete('cascade');
             $table->decimal('amount', 10, 2)->default(0);
             $table->string('payment_method')->nullable();
             $table->string('bank_receiver')->nullable();
             $table->string('bank_name')->nullable();
             $table->string('sender_name')->nullable();
-            $table->string('status')->default('pending'); // pending, completed, failed
+            $table->enum('status', ['pending,completed,failed']); // pending, completed, failed
             $table->timestamps();
         });
     }

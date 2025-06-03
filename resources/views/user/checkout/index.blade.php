@@ -59,68 +59,200 @@
                                                 class="inline-block px-2 py-1 bg-gray-200 text-gray-800 text-xs rounded">Tidak
                                                 Aktif</span>
                                         @endif
+                                        {{-- email --}}
+                                        {{-- @if (!empty($selectedAddress['email'])) --}}
+                                        <div>{{ Auth::user()->email }}</div>
+                                        {{-- @endif --}}
                                     </div>
                                 @endif
 
-                                <label for="shipping_address_id"
-                                    class="block mb-2 text-sm font-medium text-gray-700">Pilih Alamat Pengiriman</label>
-                                <select name="shipping_address_id" id="shipping_address_id"
-                                    class="border rounded px-3 py-2 w-full mb-2" required>
-                                    @foreach ($shippingAddress as $address)
-                                        <option value="{{ $address['id'] }}"
-                                            data-label="{{ $address['label'] ?? 'Alamat' }}"
-                                            data-address_line1="{{ $address['address_line1'] }}"
-                                            data-address_line2="{{ $address['address_line2'] ?? '' }}"
-                                            data-city="{{ $address['city'] }}" data-state="{{ $address['state'] }}"
-                                            data-postal_code="{{ $address['postal_code'] }}"
-                                            data-country="{{ $address['country'] }}"
-                                            data-phone_number="{{ $address['phone_number'] ?? '' }}"
-                                            data-is_default="{{ $address['is_default'] }}"
-                                            data-is_active="{{ $address['is_active'] }}"
-                                            @if ($selectedAddress && $selectedAddress['id'] == $address['id']) selected @endif>
-                                            {{ $address['label'] ?? 'Alamat' }} - {{ $address['address_line1'] }},
-                                            {{ $address['city'] }}
-                                            @if ($address['is_default'])
-                                                [Utama]
-                                            @endif
-                                            @if (!$address['is_active'])
-                                                [Tidak Aktif]
-                                            @endif
-                                        </option>
-                                    @endforeach
-                                </select>
+                                @if (count($shippingAddress) === 0)
+                                    <label for="shipping_address_id"
+                                        class="block mb-2 text-sm font-medium text-gray-700">Pilih Alamat
+                                        Pengiriman</label>
+                                    <select name="shipping_address_id" id="shipping_address_id"
+                                        class="border rounded px-3 py-2 w-full mb-2" required>
+                                        <option value="" disabled selected>Pilih alamat pengiriman</option>
+                                        <option value="buat_baru">+ Buat Alamat Baru</option>
+                                    </select>
+                                @else
+                                    <label for="shipping_address_id"
+                                        class="block mb-2 text-sm font-medium text-gray-700">Pilih Alamat
+                                        Pengiriman</label>
+                                    <select name="shipping_address_id" id="shipping_address_id"
+                                        class="border rounded px-3 py-2 w-full mb-2" required>
+                                        @foreach ($shippingAddress as $address)
+                                            <option value="{{ $address['id'] }}"
+                                                data-label="{{ $address['label'] ?? 'Alamat' }}"
+                                                data-address_line1="{{ $address['address_line1'] }}"
+                                                data-address_line2="{{ $address['address_line2'] ?? '' }}"
+                                                data-city="{{ $address['city'] }}"
+                                                data-state="{{ $address['state'] }}"
+                                                data-postal_code="{{ $address['postal_code'] }}"
+                                                data-country="{{ $address['country'] }}"
+                                                data-phone_number="{{ $address['phone_number'] ?? '' }}"
+                                                data-is_default="{{ $address['is_default'] }}"
+                                                data-is_active="{{ $address['is_active'] }}"
+                                                @if ($selectedAddress && $selectedAddress['id'] == $address['id']) selected @endif>
+                                                {{ $address['label'] ?? 'Alamat' }} - {{ $address['address_line1'] }},
+                                                {{ $address['city'] }}
+                                                @if ($address['is_default'])
+                                                    [Utama]
+                                                @endif
+                                                @if (!$address['is_active'])
+                                                    [Tidak Aktif]
+                                                @endif
+                                            </option>
+                                        @endforeach
+                                        <option value="buat_baru">+ Buat Alamat Baru</option>
+                                    </select>
+                                @endif
 
-                                <script>
-                                    document.addEventListener('DOMContentLoaded', function() {
-                                        const select = document.getElementById('shipping_address_id');
-                                        const infoDiv = document.getElementById('selected-address-info');
-                                        if (!select || !infoDiv) return;
+                                <!-- Modal -->
+                                @push('modal-section')
+                                    <div id="modal-address"
+                                        class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+                                        <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+                                            <button type="button" id="close-modal-address"
+                                                class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+                                            <h3 class="text-lg font-semibold mb-4">Buat Alamat Baru</h3>
+                                            <form id="address-form"
+                                                action="{{ route('user.address.store-new-from-checkout', ['redirect' => request()->fullUrl()]) }}"
+                                                method="POST" class="space-y-6">
+                                                @csrf
+                                                <input type="hidden" name="address_id" id="address_id" value="">
+                                                <div>
+                                                    <label for="label" class="block text-sm font-medium">Label Alamat
+                                                        (opsional)</label>
+                                                    <input type="text" name="label" id="label"
+                                                        class="mt-1 block w-full border rounded"
+                                                        value="{{ old('label') }}">
+                                                </div>
+                                                <div>
+                                                    <label for="address_line1" class="block text-sm font-medium">Alamat
+                                                        1</label>
+                                                    <input type="text" name="address_line1" id="address_line1"
+                                                        class="mt-1 block w-full border rounded"
+                                                        value="{{ old('address_line1') }}" required>
+                                                </div>
+                                                <div>
+                                                    <label for="address_line2" class="block text-sm font-medium">Alamat 2
+                                                        (opsional)</label>
+                                                    <input type="text" name="address_line2" id="address_line2"
+                                                        class="mt-1 block w-full border rounded"
+                                                        value="{{ old('address_line2') }}">
+                                                </div>
+                                                <div>
+                                                    <label for="city" class="block text-sm font-medium">Kota</label>
+                                                    <input type="text" name="city" id="city"
+                                                        class="mt-1 block w-full border rounded"
+                                                        value="{{ old('city') }}" required>
+                                                </div>
+                                                <div>
+                                                    <label for="state" class="block text-sm font-medium">Provinsi</label>
+                                                    <input type="text" name="state" id="state"
+                                                        class="mt-1 block w-full border rounded"
+                                                        value="{{ old('state') }}" required>
+                                                </div>
+                                                <div>
+                                                    <label for="postal_code" class="block text-sm font-medium">Kode
+                                                        Pos</label>
+                                                    <input type="text" name="postal_code" id="postal_code"
+                                                        class="mt-1 block w-full border rounded"
+                                                        value="{{ old('postal_code') }}" required>
+                                                </div>
+                                                <div>
+                                                    <label for="country" class="block text-sm font-medium">Negara</label>
+                                                    <input type="text" name="country" id="country"
+                                                        class="mt-1 block w-full border rounded"
+                                                        value="{{ old('country') }}" required>
+                                                </div>
+                                                <div>
+                                                    <label for="phone_number" class="block text-sm font-medium">No.
+                                                        Telepon (opsional)</label>
+                                                    <input type="text" name="phone_number" id="phone_number"
+                                                        class="mt-1 block w-full border rounded"
+                                                        value="{{ old('phone_number') }}">
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <input type="checkbox" name="is_default" id="is_default"
+                                                        value="1" {{ old('is_default') ? 'checked' : '' }}>
+                                                    <label for="is_default" class="text-sm">Jadikan sebagai alamat
+                                                        utama</label>
+                                                </div>
+                                                <div>
+                                                    <button type="submit" form="address-form"
+                                                        class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Simpan
+                                                        Alamat</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                @endpush
 
-                                        select.addEventListener('change', function() {
-                                            const selected = select.options[select.selectedIndex];
-                                            let html = `<div class="font-bold">${selected.dataset.label}</div>`;
-                                            html += `<div>${selected.dataset.address_line1}</div>`;
-                                            if (selected.dataset.address_line2) {
-                                                html += `<div>${selected.dataset.address_line2}</div>`;
+
+                                @push('after-scripts')
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function() {
+                                            const select = document.getElementById('shipping_address_id');
+                                            const infoDiv = document.getElementById('selected-address-info');
+                                            const modal = document.getElementById('modal-address');
+                                            const closeModalBtn = document.getElementById('close-modal-address');
+
+                                            if (select) {
+                                                select.addEventListener('change', function() {
+                                                    if (select.value === 'buat_baru') {
+                                                        modal.classList.remove('hidden');
+                                                        select.value = '';
+                                                        if (infoDiv) infoDiv.innerHTML = '';
+                                                        return;
+                                                    }
+                                                    @if (count($shippingAddress) > 0)
+                                                        const selected = select.options[select.selectedIndex];
+                                                        if (infoDiv && selected && selected.value !== 'buat_baru') {
+                                                            let html = `<div class="font-bold">${selected.dataset.label}</div>`;
+                                                            html += `<div>${selected.dataset.address_line1}</div>`;
+                                                            if (selected.dataset.address_line2) {
+                                                                html += `<div>${selected.dataset.address_line2}</div>`;
+                                                            }
+                                                            html +=
+                                                                `<div>${selected.dataset.city}, ${selected.dataset.state}, ${selected.dataset.postal_code}</div>`;
+                                                            html += `<div>${selected.dataset.country}</div>`;
+                                                            if (selected.dataset.phone_number) {
+                                                                html += `<div>Telp: ${selected.dataset.phone_number}</div>`;
+                                                            }
+                                                            if (selected.dataset.is_default == "1") {
+                                                                html +=
+                                                                    `<span class="inline-block px-2 py-1 bg-blue-200 text-blue-800 text-xs rounded">Utama</span>`;
+                                                            }
+                                                            if (selected.dataset.is_active == "0") {
+                                                                html +=
+                                                                    `<span class="inline-block px-2 py-1 bg-gray-200 text-gray-800 text-xs rounded">Tidak Aktif</span>`;
+                                                            }
+                                                            infoDiv.innerHTML = html;
+                                                        }
+                                                    @endif
+                                                });
                                             }
-                                            html +=
-                                                `<div>${selected.dataset.city}, ${selected.dataset.state}, ${selected.dataset.postal_code}</div>`;
-                                            html += `<div>${selected.dataset.country}</div>`;
-                                            if (selected.dataset.phone_number) {
-                                                html += `<div>Telp: ${selected.dataset.phone_number}</div>`;
+
+                                            if (closeModalBtn && modal) {
+                                                closeModalBtn.addEventListener('click', function() {
+                                                    modal.classList.add('hidden');
+                                                });
                                             }
-                                            if (selected.dataset.is_default == "1") {
-                                                html +=
-                                                    `<span class="inline-block px-2 py-1 bg-blue-200 text-blue-800 text-xs rounded">Utama</span>`;
+
+                                            // Optional: close modal on outside click
+                                            if (modal) {
+                                                modal.addEventListener('click', function(e) {
+                                                    if (e.target === modal) {
+                                                        modal.classList.add('hidden');
+                                                    }
+                                                });
                                             }
-                                            if (selected.dataset.is_active == "0") {
-                                                html +=
-                                                    `<span class="inline-block px-2 py-1 bg-gray-200 text-gray-800 text-xs rounded">Tidak Aktif</span>`;
-                                            }
-                                            infoDiv.innerHTML = html;
                                         });
-                                    });
-                                </script>
+                                    </script>
+                                @endpush
+
                             </div>
                             <!-- Order Summary -->
                             <div class="mb-6">

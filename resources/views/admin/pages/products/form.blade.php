@@ -40,7 +40,7 @@
                                         Product Name <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                        id="name" name="name" value="{{ old('name', $product->name ?? '') }}"
+                                        id="name" name="name" value="{{ old('name', @$product->name ?? '') }}"
                                         required minlength="2" maxlength="255">
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -48,13 +48,23 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
+                                    <label for="description" class="form-label">Sort Description</label>
                                     <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description"
-                                        rows="4" maxlength="1000">{{ old('description', $product->description ?? '') }}</textarea>
+                                        rows="4" maxlength="1000">{{ old('description', @$product->description ?? '') }}</textarea>
                                     @error('description')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     <small class="form-text text-muted">Maximum 1000 characters</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="long_description" class="form-label"> Long Description</label>
+                                    <textarea class="form-control @error('long_description') is-invalid @enderror" id="long_description"
+                                        name="long_description" rows="4" maxlength="1000">{{ old('long_description', @$product->long_description ?? '') }}</textarea>
+                                    @error('long_description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">Maximum 5000 characters</small>
                                 </div>
 
                                 <div class="row mb-3">
@@ -66,11 +76,11 @@
                                             id="product_type" name="product_type" required>
                                             <option value="">-- Select Product Type --</option>
                                             <option value="physical"
-                                                {{ old('product_type', $product->product_type ?? 'physical') == 'physical' ? 'selected' : '' }}>
+                                                {{ old('product_type', @$product->product_type ?? 'physical') == 'physical' ? 'selected' : '' }}>
                                                 Physical
                                             </option>
                                             <option value="digital"
-                                                {{ old('product_type', $product->product_type ?? '') == 'digital' ? 'selected' : '' }}>
+                                                {{ old('product_type', @$product->product_type ?? '') == 'digital' ? 'selected' : '' }}>
                                                 Digital
                                             </option>
                                         </select>
@@ -86,7 +96,7 @@
                                             @foreach ($categories as $category)
                                                 <option value="{{ $category->id }}"
                                                     data-product-type="{{ $category->product_type }}"
-                                                    {{ old('category_id', $product->category_id ?? '') == $category->id ? 'selected' : '' }}>
+                                                    {{ old('category_id', @$product->category_id ?? '') == $category->id ? 'selected' : '' }}>
                                                     {{ $category->name }}
                                                 </option>
                                             @endforeach
@@ -99,14 +109,14 @@
 
                                 {{-- product Digital Basic --}}
                                 <div class="row mb-3" id="digital-fields"
-                                    style="{{ old('product_type', $product->product_type ?? 'physical') == 'digital' ? '' : 'display: none;' }}">
+                                    style="{{ old('product_type', @$product->product_type ?? 'physical') == 'digital' ? '' : 'display: none;' }}">
                                     <div class="col-md-6">
                                         <label for="format" class="form-label">
                                             Format <span class="text-danger digital-required">*</span>
                                         </label>
                                         <input type="text" class="form-control @error('format') is-invalid @enderror"
                                             id="format" name="format"
-                                            value="{{ old('format', $product->format ?? '') }}"
+                                            value="{{ old('format', @$product->format ?? '') }}"
                                             placeholder="e.g. PDF, EPUB, MP3">
                                         @error('format')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -118,7 +128,7 @@
                                         </label>
                                         <input type="text"
                                             class="form-control @error('file_size') is-invalid @enderror" id="file_size"
-                                            name="file_size" value="{{ old('file_size', $product->file_size ?? '') }}"
+                                            name="file_size" value="{{ old('file_size', @$product->file_size ?? '') }}"
                                             placeholder="e.g. 10MB, 500KB">
                                         @error('file_size')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -164,8 +174,8 @@
                                             // Check if categoryOptions exists, fallback to categories if not
                                             const allOptions = @json($categoryOptions);
 
-                                            const oldCategoryValue = "{{ old('category_id', $product->category_id ?? '') }}";
-                                            const currentProductType = "{{ old('product_type', $product->product_type ?? 'physical') }}";
+                                            const oldCategoryValue = "{{ old('category_id', @$product->category_id ?? '') }}";
+                                            const currentProductType = "{{ old('product_type', @$product->product_type ?? 'physical') }}";
 
                                             function filterCategories() {
                                                 const selectedType = productTypeSelect.value;
@@ -265,10 +275,10 @@
                                         id="pricing_type" name="pricing_type" required>
                                         <option value="">-- Select Pricing Type --</option>
                                         <option value="basic"
-                                            {{ old('pricing_type', $product->pricing_type ?? 'basic') == 'basic' ? 'selected' : '' }}>
+                                            {{ old('pricing_type', @$product->pricing_type ?? 'basic') == 'basic' ? 'selected' : '' }}>
                                             Basic</option>
                                         {{-- <option value="variant"
-                                            {{ old('pricing_type', $product->pricing_type ?? '') == 'variant' ? 'selected' : '' }}
+                                            {{ old('pricing_type', @$product->pricing_type ?? '') == 'variant' ? 'selected' : '' }}
                                             disabled>
                                             Using Variant</option> --}}
                                     </select>
@@ -288,7 +298,7 @@
                                                 <input type="number" step="0.01"
                                                     class="form-control @error('price') is-invalid @enderror"
                                                     id="price" name="price"
-                                                    value="{{ old('price', $product->price ?? '') }}" min="0"
+                                                    value="{{ old('price', @$product->price ?? '') }}" min="0"
                                                     max="999999.99">
                                             </div>
                                             @error('price')
@@ -301,7 +311,7 @@
                                             <input type="number"
                                                 class="form-control @error('stock') is-invalid @enderror"
                                                 id="stock" name="stock"
-                                                value="{{ old('stock', $product->stock ?? 0) }}" min="0"
+                                                value="{{ old('stock', @$product->stock ?? 0) }}" min="0"
                                                 max="999999">
                                             @error('stock')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -331,7 +341,7 @@
                                             </thead>
                                             <tbody>
                                                 @php
-                                                    $variants = old('variants', $product->variants ?? []);
+                                                    $variants = old('variants', @$product->variants ?? []);
                                                 @endphp
                                                 @if (!empty($variants))
                                                     @foreach ($variants as $i => $variant)
@@ -458,14 +468,14 @@
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="key_features_toggle"
                                         name="has_key_features"
-                                        {{ old('has_key_features', $product->details->count() > 0 ?? false) ? 'checked' : '' }}>
+                                        {{ old('has_key_features', @$product->details?->count() > 0 ?? false) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="key_features_toggle">Enable Key
                                         Features</label>
                                 </div>
 
                                 {{-- Dynamic Key Features --}}
                                 <div id="key_features_section"
-                                    style="{{ old('has_key_features', $product->details->count() > 0 ?? false) ? '' : 'display: none;' }}">
+                                    style="{{ old('has_key_features', @$product->details?->count() > 0 ?? false) ? '' : 'display: none;' }}">
                                     <div class="mb-2">
                                         <button type="button" class="btn btn-outline-primary btn-sm"
                                             id="add-keyfeature-row">
@@ -484,7 +494,7 @@
                                             </thead>
                                             <tbody>
                                                 @php
-                                                    $keyfeatures = old('keyfeatures', $product->details ?? []);
+                                                    $keyfeatures = old('keyfeatures', @$product->details ?? []);
                                                 @endphp
                                                 @if (!empty($keyfeatures))
                                                     @foreach ($keyfeatures as $i => $kf)
@@ -622,11 +632,11 @@
                                     {{-- Preview selected images --}}
                                     <div id="gallery-preview" class="mt-2"></div>
                                     {{-- Display existing images if editing --}}
-                                    @if (isset($product) && $product->media->count() > 0)
+                                    @if (isset($product) && @$product->media->count() > 0)
                                         <div class="mt-3">
                                             <h5>Existing Images:</h5>
                                             <div class="d-flex flex-wrap" id="existing-gallery">
-                                                @foreach ($product->media as $media)
+                                                @foreach (@$product->media as $media)
                                                     <div class="position-relative me-2 mb-2"
                                                         style="display:inline-block;">
                                                         <img src="{{ $media->getUrl() }}" class="img-thumbnail"

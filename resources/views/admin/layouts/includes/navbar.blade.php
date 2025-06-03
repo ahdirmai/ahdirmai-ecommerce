@@ -7,7 +7,7 @@
                  </a>
              </li>
              <li class="nav-item dropdown">
-                 <a class="nav-link " href="javascript:void(0)" id="drop1" data-bs-toggle="dropdown"
+                 {{-- <a class="nav-link " href="javascript:void(0)" id="drop1" data-bs-toggle="dropdown"
                      aria-expanded="false">
                      <iconify-icon icon="solar:bell-linear" class="fs-6"></iconify-icon>
                      <div class="notification bg-primary rounded-circle"></div>
@@ -21,7 +21,7 @@
                              Item 2
                          </a>
                      </div>
-                 </div>
+                 </div> --}}
              </li>
          </ul>
          <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
@@ -35,7 +35,7 @@
                      </a>
                      <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
                          <div class="message-body">
-                             <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                             {{-- <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
                                  <i class="ti ti-user fs-6"></i>
                                  <p class="mb-0 fs-3">My Profile</p>
                              </a>
@@ -46,7 +46,7 @@
                              <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
                                  <i class="ti ti-list-check fs-6"></i>
                                  <p class="mb-0 fs-3">My Task</p>
-                             </a>
+                             </a> --}}
 
                              <form method="POST" action="{{ route('logout') }}">
                                  @csrf

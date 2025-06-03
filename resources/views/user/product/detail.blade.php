@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="title">
-        {{ __('Dashboard') }}
+        {{ ucfirst($product->name) }} - Product Detail
     </x-slot>
 
     <div class="p-12">

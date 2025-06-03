@@ -8,7 +8,18 @@ class Payment extends Model
 {
     protected $guarded = [];
 
-    // user
+    // hasuuid
+    public $incrementing = false;
+    protected $keyType = 'string';
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->id = \Str::uuid();
+        });
+    }
+    // user 
     public function user()
     {
         return $this->belongsTo(User::class);

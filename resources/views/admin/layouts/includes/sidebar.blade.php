@@ -2,8 +2,9 @@
 
     <div>
         <div class="brand-logo d-flex align-items-center justify-content-between">
-            <a href="./index.html" class="text-nowrap logo-img">
-                <img src=" {{ asset('assets/images/logos/logo.svg') }}" alt="" />
+            <a href="{{ route('admin.dashboard.index') }}" class="text-nowrap logo-img">
+                {{--  --}}
+                <span style="font-weight: bold; color: #000; font-size: 2rem;">DigitalHub</span>
             </a>
             <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                 <i class="ti ti-x fs-8"></i>
@@ -37,6 +38,15 @@
                         href="{{ route('admin.products.index') }}" aria-expanded="false">
                         <iconify-icon icon="solar:atom-line-duotone"></iconify-icon>
                         <span class="hide-menu">Products</span>
+                    </a>
+                </li>
+
+                {{-- order --}}
+                <li class="sidebar-item">
+                    <a class="sidebar-link primary-hover-bg {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
+                        href="{{ route('admin.orders.index') }}" aria-expanded="false">
+                        <iconify-icon icon="solar:atom-line-duotone"></iconify-icon>
+                        <span class="hide-menu">Orders</span>
                     </a>
                 </li>
 

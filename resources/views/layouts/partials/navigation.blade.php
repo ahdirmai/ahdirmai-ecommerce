@@ -45,7 +45,7 @@
                         id="cartModalToggle"></i>
                     <span
                         class="absolute -top-2 -right-2 bg-black dark:bg-white text-white dark:text-black text-xs px-1 rounded-full"
-                        id="cart-count">0</span>
+                        id="cart-count">{{ $cart_count ?? 0 }}</span>
                 </div>
 
                 <!-- Cart Modal (slide in from right) -->

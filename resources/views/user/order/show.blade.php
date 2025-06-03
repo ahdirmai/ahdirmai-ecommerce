@@ -62,12 +62,32 @@
                         </ul>
                     </div>
                 </div>
-                <div class="flex justify-end">
-                    <a href="{{ route('user.order.get-upload-proof', $order) }}"
-                        class="bg-blue-600 text-white px-6 py-3 rounded font-semibold hover:bg-blue-700 transition">
-                        Upload Bukti Transfer
-                    </a>
-                </div>
+                @if ($order->status == 'pending' || $order->payment->status == 'Partial')
+                    <div class="flex justify-end">
+                        <a href="{{ route('user.order.get-upload-proof', $order) }}"
+                            class="bg-blue-600 text-white px-6 py-3 rounded font-semibold hover:bg-blue-700 transition">
+                            Upload Bukti Transfer
+                        </a>
+                    </div>
+                @endif
+
+                {{-- if processing --}}
+                {{-- Pesanan Diterima --}}
+                @if ($order->payment->status == 'Completed' && $order->status == 'processing')
+                    <div class="mt-6">
+                        <h3 class="text-lg font-semibold mb-2">Pesanan Diterima</h3>
+                        <p class="text-gray-600">Terima kasih telah melakukan pembayaran. Pesanan Anda sedang dalam
+                            proses.</p>
+                        <form action="{{ route('user.order.received', $order) }}" method="POST" class="mt-4">
+                            @csrf
+                            <button type="submit"
+                                class="bg-green-600 text-white px-6 py-3 rounded font-semibold hover:bg-green-700 transition">
+                                Konfirmasi Pesanan Diterima
+                            </button>
+                        </form>
+                    </div>
+                @endif
+
             </div>
         </div>
         {{-- </section> --}}
@@ -95,8 +115,8 @@
                             <tr>
                                 <td class="px-4 py-2">{{ $payment->created_at->format('d M Y H:i') }}</td>
                                 <td class="px-4 py-2">Rp. {{ number_format($payment->amount, 2) }}</td>
+                                <td class="px-4 py-2">{{ $payment->bank_receiver ?? '-' }}</td>
                                 <td class="px-4 py-2">{{ $payment->bank_name ?? '-' }}</td>
-                                <td class="px-4 py-2">{{ $payment->sender_bank ?? '-' }}</td>
                                 <td class="px-4 py-2">{{ $payment->sender_name ?? '-' }}</td>
                                 <td class="px-4 py-2">{{ ucfirst($payment->status ?? '-') }}</td>
                                 {{-- button for show image transfer (modal) --}}

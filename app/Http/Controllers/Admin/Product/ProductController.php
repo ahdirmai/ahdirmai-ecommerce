@@ -25,7 +25,8 @@ class ProductController extends Controller
             $searchInput = $request->search;
             $query->where(function ($q) use ($searchInput) {
                 $q->where('name', 'LIKE', "%{$searchInput}%")
-                    ->orWhere('description', 'LIKE', "%{$searchInput}%");
+                    ->orWhere('description', 'LIKE', "%{$searchInput}%")
+                    ->orWhere('long_description', 'LIKE', "%{$searchInput}%");
             });
         }
 
@@ -139,6 +140,7 @@ class ProductController extends Controller
 
         $products = Product::where('name', 'LIKE', "%{$query}%")
             ->orWhere('description', 'LIKE', "%{$query}%")
+            ->orWhere('long_description', 'LIKE', "%{$query}%")
             ->orderBy('name')
             ->limit(10)
             ->get(['id', 'name', 'product_type', 'price']);
@@ -179,6 +181,7 @@ class ProductController extends Controller
                 Rule::unique('products', 'name')->ignore($ignoreId)
             ],
             'description' => 'nullable|string|max:1000',
+            'long_description' => 'nullable|string|max:5000',
             'product_type' => [
                 'required',
                 'string',
@@ -223,6 +226,7 @@ class ProductController extends Controller
             'name' => trim($validated['name']),
             'slug' => $this->generateSlug($validated['name']),
             'description' => $validated['description'],
+            'long_description' => $validated['long_description'] ?? null,
             'product_type' => $validated['product_type'],
             'price' => $validated['price'],
             'category_id' => $validated['category_id'],

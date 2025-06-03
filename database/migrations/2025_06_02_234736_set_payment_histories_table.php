@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-
-        Schema::table('payments', function (Blueprint $table) {
-            $table->decimal('amount_paid', 10, 2)->default(0)->after('amount');
-            
+        Schema::table('payment_histories', function (Blueprint $table) {
+            $table->enum('status', ['pending', 'completed', 'failed'])->default('pending')->change();
         });
     }
 
@@ -23,9 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
-        Schema::table('payments', function (Blueprint $table) {
-            $table->dropColumn('amount_paid');
+        Schema::table('payment_histories', function (Blueprint $table) {
+            $table->enum('status', ['pending,completed,failed'])->default('pending')->change();
         });
     }
 };

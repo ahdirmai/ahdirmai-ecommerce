@@ -57,39 +57,76 @@ class OrderController extends Controller
             'proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $payment = Payment::where('order_id', $order->id)->firstOrFail();
-        // $table->unsignedBigInteger('user_id');
-        // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        // $table->unsignedBigInteger('payment_id');
-        // $table->foreign('payment_id')->references('id')->on('payments')->onDelete('cascade');
-        // $table->decimal('amount', 10, 2)->default(0);
-        // $table->string('payment_method')->nullable();
-        // $table->string('bank_name')->nullable();
-        // $table->string('sender_name')->nullable();
-        // $table->string('status')->default('pending');
-        // create payment history
-        $payment_history = PaymentHistory::create([
-            'payment_id' => $payment->id,
-            'user_id' => auth()->id(),
-            'amount' => $payment->amount, // Assuming amount is stored in the payment model
-            'payment_method' => $payment->payment_method, // e.g., 'bank_transfer'
-            'bank_name' => $request->input('bank_account_id'), // e.g., 'Bank Mandiri'
-            'sender_name' => $request->input('sender_name'), // e.g., 'John Doe'
-            'status' => 'pending', // Set initial status to pending
-        ]);
+        try {
+            \DB::beginTransaction();
 
-        // Handle file upload using spatie media library accociate with payment history
-        if ($request->hasFile('proof')) {
-            $file = $request->file('proof');
-            // Store the file in the 'proofs' collection
-            $payment_history->addMedia($file)->toMediaCollection('proofs');
-        } else {
-            return redirect()->back()->withErrors(['proof' => 'Proof of payment is required.']);
+            $payment = Payment::where('order_id', $order->id)->firstOrFail();
+            $payment_history = PaymentHistory::create([
+                'payment_id' => $payment->id,
+                'user_id' => auth()->id(),
+                'amount' => $request->amount, // Assuming amount is stored in the payment model
+                'payment_method' => $payment->payment_method,
+                'bank_receiver' => $request->input('bank_account_id'), // e.g., 'Bank Mandiri' 
+                // e.g., 'bank_transfer'
+                'bank_name' => $request->input('sender_bank'), // e.g., 'Bank Mandiri'
+                'sender_name' => $request->input('sender_name'), // e.g., 'John Doe'
+                'status' => 'pending', // Set initial status to pending
+            ]);
+
+            // Handle file upload using spatie media library accociate with payment history
+            if ($request->hasFile('proof')) {
+                $file = $request->file('proof');
+                // Store the file in the 'proofs' collection
+                $payment_history->addMedia($file)->toMediaCollection('proofs');
+            } else {
+                \DB::rollBack();
+                return redirect()->back()->withErrors(['proof' => 'Proof of payment is required.']);
+            }
+
+            \DB::commit();
+
+            Alert::success('Success', 'Proof of payment uploaded successfully.');
+
+            // Show success message
+            return redirect()->route('user.order.show', ['order' => $order])->with('success', 'Proof of payment uploaded successfully.');
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            if (app()->environment('local')) {
+
+                Alert::error('Error', 'Failed to upload proof of payment: ' . $e->getMessage());
+                # code...
+            } else {
+
+                Alert::error('Error', 'Failed to upload proof of payment. Please try again.');
+            }
+
+            return redirect()->back()->withErrors(['error' => 'Failed to upload proof of payment. Please try again.']);
         }
+    }
 
-        Alert::success('Success', 'Proof of payment uploaded successfully.');
+    // receivedOrder
+    public function receivedOrder(Request $request, Order $order)
+    {
+        // Validate the request
+        // $request->validate([
+        //     'received' => 'required|boolean',
+        // ]);
 
-        // Show success message
-        return redirect()->route('user.order.show', ['order' => $order])->with('success', 'Proof of payment uploaded successfully.');
+        try {
+            \DB::beginTransaction();
+
+            // Update order status to 'completed'
+            $order->update(['status' => 'completed']);
+
+            \DB::commit();
+
+            Alert::success('Success', 'Order marked as received successfully.');
+
+            return redirect()->route('user.order.show', ['order' => $order])->with('success', 'Order marked as received successfully.');
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            Alert::error('Error', 'Failed to mark order as received: ' . $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Failed to mark order as received. Please try again.']);
+        }
     }
 }

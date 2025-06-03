@@ -60,16 +60,16 @@
                                             </td>
                                             <td class="px-4 py-3 text-center md:table-cell">
                                                 <div class="flex items-center justify-center gap-2">
-                                                    <button
+                                                    {{-- <button
                                                         class="quantity-btn minus px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                                                        data-id="{{ $item->id }}" type="button">-</button>
+                                                        data-id="{{ $item->id }}" type="button">-</button> --}}
                                                     <input type="number" value="{{ $item->quantity }}" min="1"
                                                         max="10"
                                                         class="item-quantity w-12 text-center border rounded"
                                                         data-id="{{ $item->id }}" readonly />
-                                                    <button
+                                                    {{-- <button
                                                         class="quantity-btn plus px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                                                        data-id="{{ $item->id }}" type="button">+</button>
+                                                        data-id="{{ $item->id }}" type="button">+</button> --}}
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-center font-semibold text-gray-900 md:table-cell total-price"

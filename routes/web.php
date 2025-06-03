@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Category\CategoryController;
 use App\Http\Controllers\Admin\Dashboard\DashboardController;
+use App\Http\Controllers\Admin\Order\OrderController as OrderOrderController;
 use App\Http\Controllers\Admin\Product\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\User\AddressController;
@@ -14,13 +15,13 @@ use App\Http\Controllers\User\ProfileController as UserProfileController;
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Contracts\Role;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
 Route::get('/', [UserDashboardController::class, 'index'])->name('dashboard');
 Route::get('/products', [UserProductController::class, 'index'])->name('products.index');
 Route::get('/product/{slug}', [UserProductController::class, 'show'])->name('products.show');
+
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [UserProfileController::class, 'index'])->name('profile.show');
@@ -32,6 +33,7 @@ Route::middleware('auth')->group(function () {
     // CRUD Address
     Route::get('/address', [AddressController::class, 'index'])->name('user.address.index');
     Route::post('/address/store', [AddressController::class, 'store'])->name('user.address.store');
+    Route::post('/address/store-new-from-checkout', [AddressController::class, 'storeNewFromCheckout'])->name('user.address.store-new-from-checkout');
     Route::put('/address/update/{address}', [AddressController::class, 'update'])->name('user.address.update');
     Route::delete('/address/delete/{address}', [AddressController::class, 'deleteAddress'])->name('user.address.delete');
     Route::patch('/address/set-default/{address}', [AddressController::class, 'setDefaultAddress'])->name('user.address.set_default');
@@ -62,6 +64,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/order/{order}/upload-proof', [OrderController::class, 'getUploadProof'])->name('user.order.get-upload-proof');
     Route::POST('/order/{order}/upload-proof', [OrderController::class, 'uploadProof'])->name('user.order.store-upload-proof');
     Route::post('/order/{order}/cancel', [OrderController::class, 'cancelOrder'])->name('user.order.cancel');
+
+    Route::post('/order/{order}/received', [OrderController::class, 'receivedOrder'])->name('user.order.received');
 });
 
 // admin routes
@@ -91,7 +95,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::put('/{product}/update', [ProductController::class, 'update'])->name('update');
         Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
     });
+
+    // order
+    Route::prefix('admin/orders')->name('admin.orders.')->group(function () {
+        Route::get('/', [OrderOrderController::class, 'index'])->name('index');
+        Route::get('/{order}', [OrderOrderController::class, 'show'])->name('show');
+        Route::post('/{order}/{payment_history}/update-status', [OrderOrderController::class, 'updateStatus'])->name('update-status');
+    });
+
+    route::POST('/payment/update-amount/{history}', [OrderOrderController::class, 'updatePaymentAmount'])->name('admin.payment.update-amount');
 });
+
 
 
 

@@ -60,6 +60,49 @@ class AddressController extends Controller
         }
     }
 
+    public function storeNewFromCheckout(Request $request)
+    {
+        $request->validate([
+            'label' => 'nullable|string|max:255',
+            'address_line1' => 'required|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
+            'country' => 'required|string|max:100',
+            'phone_number' => 'nullable|string|max:30',
+            'is_default' => 'nullable|boolean',
+        ]);
+
+        try {
+            DB::transaction(function () use ($request) {
+                $user = auth()->user();
+                if ($request->is_default) {
+                    $user->addresses()->update(['is_default' => false]);
+                }
+                $address = $user->addresses()->create([
+                    'label' => $request->label,
+                    'address_line1' => $request->address_line1,
+                    'address_line2' => $request->address_line2,
+                    'city' => $request->city,
+                    'state' => $request->state,
+                    'postal_code' => $request->postal_code,
+                    'country' => $request->country,
+                    'phone_number' => $request->phone_number,
+                    'is_default' => $request->is_default ? true : false,
+                    'is_active' => true,
+                ]);
+            });
+            Alert::success('Success', 'Alamat berhasil disimpan.');
+            return redirect($request->redirect);
+
+            // return redirect()->();
+        } catch (\Exception $e) {
+            Alert::error('Error', 'Gagal menyimpan alamat.');
+            return redirect()->back()->withErrors('Gagal menyimpan alamat.');
+        }
+    }
+
     public function update(Request $request, ShippingAddress $address)
     {
         $request->validate([
